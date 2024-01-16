@@ -4,8 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "lint": "./node_modules/.bin/eslint",
+    "check-lint": "lint [0-9]*.js",
+    "start-server": "nodemon --exec babel-node --presets @babel/preset-env ./server/server.js",
+    "start-worker": "nodemon --exec babel-node --presets @babel/preset-env ./server/worker.js",
+    "keep-alive": "nodemon --exec babel-node --presets @babel/preset-env ./server/keepAlive.js",
+    "dev": "nodemon --exec babel-node --presets @babel/preset-env",
+    "test": "./node_modules/.bin/mocha --require @babel/register --exit"
   },
   "author": "",
   "license": "ISC",
