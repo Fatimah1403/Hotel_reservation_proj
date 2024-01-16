@@ -18,6 +18,17 @@ async function connectDB() {
       }
 }
 
+// Error handling
+app.use((err, req, res, next) => {
+  const errorStatus = err.status || 500;
+  const errorMsg = err.message || "Something went wrong";
+  return res.status(errorStatus).json({
+    success: false,
+    status: errorStatus,
+    message: errorMsg,
+    stack: err.stack,
+  });
+});
 
 app.listen(port, () => {
     console.log(`Server is listening on http://localhost:${port}`)
