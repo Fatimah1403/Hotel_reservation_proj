@@ -3,6 +3,7 @@
     color: white;
     display: flex;
     justify-content: center;
+    position: relative;
 }
 .headerContainer {
    width: 100%; 
@@ -44,4 +45,40 @@ font-size: 36px;
     border-radius: 10px;
     cursor: pointer;
     color: white;
+}
+.headerSearch {
+   height: 30px; 
+   background-color: white;
+   border: 3px solid #eb9934;
+   display: flex;
+   align-items: center;
+   justify-content: space-around;
+   padding: 10px 0px;
+   border-radius: 10px;
+   position: absolute;
+   bottom: -25px;
+   width: 100%;
+   max-width: 1024px;
+}
+.headerIcon {
+    color: silver;
+}
+.headerSearchItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.headerSearchBar {
+    border: none;
+    outline: none;
+}
+
+.headerSearchText {
+    color: silver;
+    cursor: pointer;
+}
+.date {
+  position: absolute; 
+  top: 50px; 
 }
