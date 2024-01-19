@@ -1,0 +1,10 @@
+/* eslint-disable jest/require-hook */
+const express = require('express');
+
+const roomController = require('../controllers/RoomController');
+
+const roomRouter = express.Router();
+
+roomRouter.get('/', roomController.getAllRooms);
+
+module.exports = roomRouter;

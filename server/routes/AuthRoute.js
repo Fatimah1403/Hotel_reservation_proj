@@ -1,9 +1,12 @@
-const express = require("express");
-const app = express();
+/* eslint-disable no-unused-vars */
+/* eslint-disable jest/require-hook */
+const express = require('express');
 
-const router = express.Router();
+const authController = require('../controllers/AuthController');
 
-router.post("/register", AuthController.register) // yet to be implemented in d controller
-router.post("/login", AuthController.login) // yet to be implemented in d controller
+const authRouter = express.Router();
 
-module.exports = router;
+// authRouter.post('/register', authController.register);
+authRouter.get('/health', authController.isHealth);
+
+module.exports = authRouter;
