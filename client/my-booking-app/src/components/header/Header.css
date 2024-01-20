@@ -84,11 +84,13 @@ font-size: 36px;
 }
 .date {
   position: absolute; 
-  top: 50px; 
+  top: 50px;
+  z-index: 2;
 }
 .options {
    position: absolute;
    top: 50px; 
+   z-index: 2;
    background-color: white;
    color: silver;
    border-radius: 5px;
