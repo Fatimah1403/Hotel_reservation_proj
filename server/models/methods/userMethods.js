@@ -51,10 +51,18 @@ async function changePassword(newPassword) {
   return this.save();
 }
 
+async function updateProfile(attributes) {
+  for (const [key, value] of Object.entries(attributes)) {
+    this[key] = value;
+  }
+  return this.save();
+}
+
 module.exports = {
   createUser,
   generateOTP,
   validateOTP,
   resetPassword,
   changePassword,
+  updateProfile,
 };

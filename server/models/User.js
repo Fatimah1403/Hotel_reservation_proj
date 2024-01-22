@@ -16,12 +16,12 @@ const user = {
 };
 const userSchema = new mongoose.Schema(user, { timestamps: true });
 
-userSchema.methods.createUser = userMethods.createUser;
+userSchema.statics.createUser = userMethods.createUser;
 userSchema.methods.generateOTP = userMethods.generateOTP;
 userSchema.methods.validateOTP = userMethods.validateOTP;
 userSchema.methods.resetPassword = userMethods.resetPassword;
 userSchema.methods.changePassword = userMethods.changePassword;
-// userSchema.methods.createUser = userMethods.createUser;
+userSchema.methods.updateProfile = userMethods.updateProfile;
 
 const User = mongoose.model('User', userSchema);
 

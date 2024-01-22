@@ -1,9 +1,12 @@
+/* eslint-disable max-len */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable guard-for-in */
 /* eslint-disable no-undef */
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const authClient = require('./AuthController');
+const RefreshToken = require('../models/RefreshToken');
+const dbClient = require('../utils/db');
 
 const userRef = [
   'username',
@@ -27,49 +30,49 @@ class UserController {
     return res.status(200).json(users);
   }
 
-  static async createUser(req, res) {
-    const attributes = {};
-    const requiredAttributes = [
-      'username',
-      'email',
-      'country',
-      'city',
-      'phone',
-      'password',
-      'isAdmin',
-      'img',
-    ];
-    // Check if the body of the request has the required attributes
-    for (const key of requiredAttributes) {
-      if (!Object.prototype.hasOwnProperty.call(req.body, key)) {
-        return res.status(400).json({
-          error: `Missing required attribute: ${key}`,
-          genFormat: '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}',
-        });
-      }
-      attributes[key] = req.body[key];
-    }
-    // Check if the user already exists
-    let coreCheck = await User.findOne({ email: attributes.email });
-    if (coreCheck) {
-      return res.status(409).json({ error: 'User email already exists' });
-    }
-    coreCheck = await User.findOne({ username: attributes.username });
-    if (coreCheck) {
-      return res.status(409).json({ error: 'Username already exists' });
-    }
-    try {
-      // Create a new user
-      const user = await User.createUser(attributes);
-      return res.status(201).json({
-        msg: 'User object successfully created',
-        data: user,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
-  }
+  // static async createUser(req, res) {
+  //   const attributes = {};
+  //   const requiredAttributes = [
+  //     'username',
+  //     'email',
+  //     'country',
+  //     'city',
+  //     'phone',
+  //     'password',
+  //     'isAdmin',
+  //     'img',
+  //   ];
+  //   // Check if the body of the request has the required attributes
+  //   for (const key of requiredAttributes) {
+  //     if (!Object.prototype.hasOwnProperty.call(req.body, key)) {
+  //       return res.status(400).json({
+  //         error: `Missing required attribute: ${key}`,
+  //         genFormat: '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}',
+  //       });
+  //     }
+  //     attributes[key] = req.body[key];
+  //   }
+  //   // Check if the user already exists
+  //   let coreCheck = await User.findOne({ email: attributes.email });
+  //   if (coreCheck) {
+  //     return res.status(409).json({ error: 'User email already exists' });
+  //   }
+  //   coreCheck = await User.findOne({ username: attributes.username });
+  //   if (coreCheck) {
+  //     return res.status(409).json({ error: 'Username already exists' });
+  //   }
+  //   try {
+  //     // Create a new user
+  //     const user = await User.createUser(attributes);
+  //     return res.status(201).json({
+  //       msg: 'User object successfully created',
+  //       data: user,
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     return res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // }
 
   static async signUp(req, res) {
     const data64 = await authClient.signInPrecheck(req);
@@ -182,10 +185,10 @@ class UserController {
       // hash the password using bcrypt
       const hashedPwd = await bcrypt.hash(password, 10);
       let user = await existingUser.validateOTP(token);
-      if (student.error) {
+      if (user.error) {
         return res.status(404).json({ error: student.error });
       }
-      user = await student.changePassword(hashedPwd);
+      user = await User.changePassword(hashedPwd);
       if (!user) {
         return res.status(500).json({ error: 'Internal Server Error' });
       }
@@ -240,7 +243,7 @@ class UserController {
     // hash the password using bcrypt
     const hashedPwd = await bcrypt.hash(newPassword, 10);
     try {
-      const updatedUser = await student.changePassword(hashedPwd);
+      const updatedUser = await user.changePassword(hashedPwd);
       if (updatedUser.error) {
         return res.status(400).json({ error: updatedUser.error });
       }
@@ -256,10 +259,10 @@ class UserController {
 
   static async login(req, res) {
     const data64 = await authClient.signInPrecheck(req);
-    if (data.error) {
+    if (data64.error) {
       return res.status(400).json({ error: data64.error });
     }
-    const decodeData = await authClient.decodeLoginToken(encryptToken);
+    const decodeData = await authClient.singinDecrypt(data64);
     if (decodeData.error) {
       return res.status(400).json({ error: decodeData.error });
     }
@@ -280,25 +283,31 @@ class UserController {
       if (!dbClient.isAlive()) {
         return res.status(500).json({ error: 'Internal Server Error' });
       }
-      const user = await Student.findOne({ email });
-      if (!email) {
-        return res.status(400).json({ error: 'Email address not found' });
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ error: 'User with this email address not found' });
       }
-      const isMatch = await bcrypt.compare(password, student.password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).json({ error: 'Incorrect password' });
       }
+
       // set up JWT token using this credentials
-      // const xToken = await authClient.createXToken(user.id);
-      // if (xToken.error) {
-      //   return res.status(500).json({
-      //     error: 'Internal Server Error',
-      //     msg: xToken.error,
-      //   });
-      // }
+      const { accessToken, refreshToken } = await authClient.generateJWT(user);
+      if (!accessToken || !refreshToken) {
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      // set the access token to redis client
+      try {
+        await authClient.setJWT(user, accessToken);
+      } catch (err) {
+        return res.status(500).json({ error: 'Redis Internal Server Error' });
+      }
       return res.status(201).json({
         message: 'Login successful',
         email: user.email,
+        accessToken,
+        refreshToken,
       });
     } catch (err) {
       console.error(err);
@@ -307,15 +316,108 @@ class UserController {
   }
 
   static async logout(req, res) {
-    const data64 = await authClient.signInPrecheck(req);
-    if (data.error) {
-      return res.status(400).json({ error: data64.error });
+    try {
+      const accessToken = await authClient.currPreCheck(req);
+      if (accessToken.error) {
+        return res.status(400).json({ error: accessToken.error });
+      }
+      const payload = await authClient.verifyAccessToken(accessToken);
+      if (payload.error) {
+        return res.status(400).json({ error: payload });
+      }
+      const { id } = payload;
+      if (!id) {
+        return res.status(400).json({ error: 'Invalid token' });
+      }
+      // delete the access token from Redis
+      try {
+        await authClient.deleteJWT(id);
+      } catch (err) {
+        return res.status(500).json({ error: 'Redis Internal Server Error', err });
+      }
+      // delete the refresh token
+      try {
+        await RefreshToken.deleteOne({ userId: id });
+      } catch (err) {
+        return res.status(500).json({ error: 'Database Internal Server Error', msg: err.message });
+      }
+      return res.status(200).json({ message: 'Logout successful' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Failed to logout' });
     }
-    const decodeData = await authClient.decodeLoginToken(encryptToken);
-    if (decodeData.error) {
-      return res.status(400).json({ error: decodeData.error });
+  }
+
+  static async updateUser(req, res) {
+    const accessToken = await authClient.currPreCheck(req);
+    if (accessToken.error) {
+      return res.status(400).json({ error: accessToken.error });
     }
-    return res.status(200).json({ message: 'Logout successful' });
+    const payload = await authClient.verifyAccessToken(accessToken);
+    if (payload.error) {
+      return res.status(400).json({ error: payload });
+    }
+    console.log(payload);
+    const { id } = payload;
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid token' });
+    }
+    // get Redis access token
+    const redisAccessToken = await authClient.getJWT(id);
+    if (redisAccessToken.error) {
+      return res.status(400).json({ error: redisAccessToken.error });
+    }
+    if (redisAccessToken !== accessToken) {
+      return res.status(400).json({ error: 'Invalid token' });
+    }
+    // update the user profile
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    if (!user) {
+      res.status(400).json({ error: 'Invalid Credentials for ths token' });
+    }
+    const attributes = {};
+    for (const key of userRef) {
+      if (Object.prototype.hasOwnProperty.call(req.body, key)) {
+        if (key !== 'email' || key !== 'password') {
+          attributes[key] = req.body[key];
+        }
+      }
+    }
+    // update the userprofile
+    const updatedUser = await user.updateProfile(attributes);
+    if (!updatedUser) {
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+    return res.status(201).json({
+      message: 'Profile updated successfully',
+      user: updatedUser,
+    });
+  }
+
+  static async refreshJWT(req, res) {
+    const oldRefreshToken = await authClient.currPreCheck(req);
+    if (oldRefreshToken.error) {
+      return res.status(400).json({ error: oldRefreshToken.error });
+    }
+    if (!oldRefreshToken) {
+      return res.status(400).json({ error: 'Missing refresh token' });
+    }
+    const payload = await authClient.verifyRefreshToken(oldRefreshToken);
+    if (payload.error) {
+      return res.status(400).json({ error: payload.error });
+    }
+    // refresh the access and refresh token
+    const refreshJWTcredentials = await authClient.refreshJWT(oldRefreshToken, payload);
+    if (refreshJWTcredentials.error) {
+      return res.status(400).json({ error: refreshJWTcredentials.error });
+    }
+    const { accessToken, refreshToken } = refreshJWTcredentials;
+    return res.status(201).json({
+      accessToken,
+      refreshToken,
+    });
   }
 }
 

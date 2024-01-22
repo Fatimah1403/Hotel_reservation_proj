@@ -1,8 +1,10 @@
+/* eslint-disable jest/require-hook */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable class-methods-use-this */
 const Redis = require('ioredis');
+require('dotenv').config();
 
-const url = process.env.REDIS_URL || 'redis://localhost:6379';
+const url = process.env.REDIS_URL;
 const msg = 'Redis connection is not alive';
 
 class RedisClient {

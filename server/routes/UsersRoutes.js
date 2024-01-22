@@ -7,12 +7,13 @@ const userController = require('../controllers/UsersController');
 const userRouter = express.Router();
 
 userRouter.get('/health', userController.isHealth);
-userRouter.post('/createuser', userController.createUser);
+// userRouter.post('/createuser', userController.createUser);
 userRouter.get('/all', userController.getAllUsers);
 userRouter.post('/signup', userController.signUp);
-// userRouter.post('/login', userController.loginUser);
-
-// userRouter.get('/logout', userController.logoutUser);
+userRouter.post('/login', userController.login);
+userRouter.put('/update', userController.updateUser);
+userRouter.post('/refreshjwt', userController.refreshJWT);
+userRouter.get('/logout', userController.logout);
 
 // userRouter.get('/verify', userController.verifyUser);
 
