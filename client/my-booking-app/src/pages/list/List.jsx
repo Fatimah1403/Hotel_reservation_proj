@@ -9,10 +9,15 @@ import SearchItem from '../../components/searchItem/SearchItem'
 
 const List = () => {
 
-  const location = useLocation()
-  const [destination, setDestination] = useState(location.state.destination);
-  const [date, setDate] = useState(location.state.date);
-  const [options, setOptions] = useState(location.state.options);
+  const location = useLocation();
+  const defaultState = {
+    destination: '',
+    date: [{ startDate: new Date(), endDate: new Date() }],
+    options: { adult: 1, children: 0, room: 1 },
+  };
+  const [destination, setDestination] = useState(location.state?.destination || defaultState.destination);
+  const [date, setDate] = useState(location.state?.date || defaultState.date);
+  const [options, setOptions] = useState(location.state?.options || defaultState.options);
   const [openDate, setOpenDate] = useState(false);
 
 

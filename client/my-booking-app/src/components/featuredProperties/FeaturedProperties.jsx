@@ -2,7 +2,7 @@ import React from 'react'
 import "./FeaturedProperties.css"
 // import Hotelprop1 from "../../assets/images/Hotelprop1.jpg"
 // import Hotelprop2 from "../../assets/images/Hotelprop2.jpg"
-import Hotelfeat  from "../../assets/images/HotelProp3.jpg"
+// import Hotelfeat  from "../../assets/images/HotelProp3.jpg"
 
 
 const FeaturedProperties = () => {
