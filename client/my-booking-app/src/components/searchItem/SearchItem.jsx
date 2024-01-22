@@ -32,7 +32,7 @@ const SearchItem = () => {
         <div className="siDetailTexts">
           <span className="siPrice">$102</span>
           <span className="siTaxOp">Includes taxes and fees</span>
-          <button className="siCheckButton">See availability</button>
+          <button className="siCheckButton">Click for details</button>
         </div>
       </div>
     </div>
