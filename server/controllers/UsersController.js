@@ -44,7 +44,7 @@ class UserController {
   //       return res.status(400).json({
   //         error: `Missing required attribute: ${key}`,
   //         genFormat:
-               '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}',
+               '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}'
   //       });
   //     }
   //     attributes[key] = req.body[key];
