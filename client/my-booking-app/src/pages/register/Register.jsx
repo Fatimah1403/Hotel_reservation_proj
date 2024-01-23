@@ -1,72 +1,130 @@
-import React from 'react'
-// import "./Register.css"
-import { Link, useNavigate } from "react-router-dom";
-
-import {
-    MDBBtn,
-    MDBContainer,
-    MDBRow,
-    MDBCol,
-    MDBCard,
-    MDBCardBody,
-    MDBCardImage,
-    MDBInput,
-    MDBIcon,
-    MDBCheckbox
-  }
-  from 'mdb-react-ui-kit';
+// import React from "react";
+import "./Register.css";
+import { useNavigate } from "react-router-dom";
+import { errorToast, successToast } from "../../components/utils/toastify";
+import { faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import requestHandler from "../../components/utils/requestHandler";
 
 const Register = () => {
+  const navigate = useNavigate();
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+    const data = {
+      username: event.target.elements.username.value,
+      email: event.target.elements.email.value,
+      password: event.target.elements.password.value,
+      country: event.target.elements.country.value,
+      city: event.target.elements.city.value,
+      phone: event.target.elements.phone.value,
+    }
+
+
+    // const validator = await validator(data)
+    const validator = true
+
+    if (!validator){
+      // register user
+      errorToast("error registering user")
+    }
+    const baseUrl = "http://localhost:6000/api/v1/users"
+    const uri = `${baseUrl}/signup`
+
+    try{
+      const parsedData = {
+        ...data,
+        email: ""
+      }
+      const response = requestHandler("post", uri, data)
+      console.log(response[0]);
+    }
+    catch(error){
+      console.log(error)
+    }
+
+  };
+
   return (
-    <div>
-       <MDBContainer fluid>
-
-        <MDBCard className='text-black m-5' style={{borderRadius: '25px'}}>
-        <MDBCardBody>
-            <MDBRow>
-            <MDBCol md='10' lg='6' className='order-2 order-lg-1 d-flex flex-column align-items-center'>
-
-                <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
-
-                <div className="d-flex flex-row align-items-center mb-4 ">
-                <MDBIcon fas icon="user me-3" size='lg'/>
-                <MDBInput label='Your Name' id='form1' type='text' className='w-100'/>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                <MDBIcon fas icon="envelope me-3" size='lg'/>
-                <MDBInput label='Your Email' id='form2' type='email'/>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                <MDBIcon fas icon="lock me-3" size='lg'/>
-                <MDBInput label='Password' id='form3' type='password'/>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                <MDBIcon fas icon="key me-3" size='lg'/>
-                <MDBInput label='Repeat your password' id='form4' type='password'/>
-                </div>
-
-                <div className='mb-4'>
-                <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Subscribe to our newsletter' />
-                </div>
-
-                <MDBBtn className='mb-4' size='lg'>Register</MDBBtn>
-
-            </MDBCol>
-
-            <MDBCol md='10' lg='6' className='order-1 order-lg-2 d-flex align-items-center'>
-                <MDBCardImage src='https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp' fluid/>
-            </MDBCol>
-
-            </MDBRow>
-        </MDBCardBody>
-        </MDBCard>
-
-        </MDBContainer>
+    <div className="body">
+      <div className="boxs">
+        <span className="borderLine"></span>
+        <form onSubmit={handleRegister}>
+          <h2>Register Here</h2>
+          <div className="columns">
+            <div className="rows">
+              <div className="inputBoxs">
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required="required"
+                />
+                {/* <!-- <div class="email_error">Please fill up your Email</div> --> */}
+                <span>Username</span>
+                <i></i>
+              </div>
+              <div className="inputBoxs">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  required="required"
+                />
+                {/* <!-- <div class="email_error">Please fill up your Email</div> --> */}
+                <span>Password</span>
+                <i></i>
+              </div>
+              <div className="inputBoxs">
+                <input
+                  type="text"
+                  id="country"
+                  name="country"
+                  required="required"
+                />
+                {/* <!-- <div class="email_error">Please fill up your Email</div> --> */}
+                <span>Country</span>
+                <i></i>
+              </div>
+            </div>
+            <div className="rows">
+              <div className="inputBoxs">
+                <input
+                  type="text"
+                  id="email"
+                  name="email"
+                  required="required"
+                />
+                {/* <!-- <div class="email_error">Please fill up your Email</div> --> */}
+                <span>Email</span>
+                <i></i>
+              </div>
+              <div className="inputBoxs">
+                <input type="text" id="city" name="city" required="required" />
+                <span>City</span>
+                <i></i>
+              </div>
+              <div className="inputBoxs">
+                <input
+                  type="number"
+                  id="phone"
+                  name="phone"
+                  required="required"
+                />
+                <span>Phone</span>
+                <i></i>
+              </div>
+              <div className="links"></div>
+            </div>
+          </div>
+          {/* <!-- <input type="submit" value="Login"> --> */}
+          <button id="loginButton" type="submit">
+            Register
+          </button>
+          {/* <!-- <a href="index.html" className="button">Login</a> --> */}
+        </form>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;
