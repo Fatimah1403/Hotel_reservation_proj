@@ -14,7 +14,9 @@ userRouter.post('/login', userController.login);
 userRouter.put('/update', userController.updateUser);
 userRouter.post('/refreshjwt', userController.refreshJWT);
 userRouter.get('/logout', userController.logout);
-
+userRouter.post('/resetpassword', userController.resetPassword);
+userRouter.put('/newpassword', userController.newPassword);
+userRouter.put('/changepassword', userController.changePassword);
 // userRouter.get('/verify', userController.verifyUser);
 
 // userRouter.get('/refresh', userController.refreshToken);

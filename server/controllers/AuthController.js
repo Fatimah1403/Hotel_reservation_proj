@@ -1,9 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable consistent-return */
-/* eslint-disable no-useless-return */
-/* eslint-disable new-cap */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable jest/require-hook */
 const JWT = require('jsonwebtoken');
 const redisClient = require('../utils/redis');
 const dbClient = require('../utils/db');
@@ -153,7 +147,12 @@ class AuthController {
   static async setJWT(obj, accessToken) {
     // set the JWT token
     const key = `auth_${obj.id}`;
-    await redisClient.set(key, accessToken, EXP);
+    try {
+      await redisClient.set(key, accessToken, EXP);
+    } catch (RedisError) {
+      console.error('Redis Error:', RedisError);
+      return ({ error: RedisError });
+    }
     return;
   }
 
@@ -169,11 +168,41 @@ class AuthController {
   static async deleteJWT(id) {
     const key = `auth_${id}`;
     try {
-      await redisClient.del(key);
+      const result = await redisClient.del(key);
+      if (result === 0) {
+        return { error: 'Token does not exist' };
+      }
+      if (!result) {
+        return { error: 'Invalid Operation', msg: 'Token does not exist' };
+      }
+      return result;
     } catch (RedisError) {
-      return ({ error: 'Redis Internal Server Error', RedisError });
+      console.error('Redis Error:', RedisError);
+      return { error: RedisError };
     }
-    return;
+  }
+
+  static async fullCurrCheck(req) {
+    const accessToken = await this.currPreCheck(req);
+    if (accessToken.error) {
+      return { error: accessToken.error };
+    }
+    const payload = await this.verifyAccessToken(accessToken);
+    if (payload.error) {
+      return { error: payload.error };
+    }
+    const { id } = payload;
+    if (!id) {
+      return { error: 'Invalid token for associated ID' };
+    }
+    const redisAccessToken = await this.getJWT(payload.id);
+    if (redisAccessToken.error) {
+      return { error: redisAccessToken.error };
+    }
+    if (redisAccessToken !== accessToken) {
+      return { error: 'Invalid token' };
+    }
+    return id;
   }
 }
 

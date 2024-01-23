@@ -1,10 +1,8 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable jest/require-hook */
 const express = require('express');
-
 const cors = require('cors');
 
-const authController = require('../controllers/AuthController');
+const roomController = require('../controllers/RoomController');
 
 const corsOptions = {
   origin: '*', // allow all origins for now
@@ -15,11 +13,9 @@ const corsOptions = {
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'X-Auth-Token', 'Authorization', 'X-Token'],
 };
 
-const authRouter = express.Router();
+const roomRouter = express.Router();
+roomRouter.use(cors(corsOptions));
 
-authRouter.use(cors(corsOptions));
+roomRouter.get('/', roomController.getAllRooms);
 
-// authRouter.post('/register', authController.register);
-authRouter.get('/health', authController.isHealth);
-
-module.exports = authRouter;
+module.exports = roomRouter;

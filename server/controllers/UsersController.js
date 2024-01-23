@@ -1,7 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable guard-for-in */
-/* eslint-disable no-undef */
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const authClient = require('./AuthController');
@@ -47,7 +43,8 @@ class UserController {
   //     if (!Object.prototype.hasOwnProperty.call(req.body, key)) {
   //       return res.status(400).json({
   //         error: `Missing required attribute: ${key}`,
-  //         genFormat: '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}',
+  //         genFormat:
+               '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}',
   //       });
   //     }
   //     attributes[key] = req.body[key];
@@ -128,7 +125,7 @@ class UserController {
       return res.status(400).json({
         error: 'Missing email',
         resolve: 'Please provide your email',
-        reqFormat: ' { email:  <string> }',
+        reqFormat: ' { email: <string> }',
       });
     }
     const user = await User.findOne({ email });
@@ -148,12 +145,12 @@ class UserController {
     }
     return res.status(201).json({
       message: 'Password reset token sent successfully',
-      email: student.email,
+      email: user.email,
       resetToken,
     });
   }
 
-  static async setNewPassword(req, res) {
+  static async newPassword(req, res) {
     const { token } = req.body;
     if (!token) {
       return res.status(400).json({ error: 'Missing token' });
@@ -186,9 +183,9 @@ class UserController {
       const hashedPwd = await bcrypt.hash(password, 10);
       let user = await existingUser.validateOTP(token);
       if (user.error) {
-        return res.status(404).json({ error: student.error });
+        return res.status(404).json({ error: user.error });
       }
-      user = await User.changePassword(hashedPwd);
+      user = await user.changePassword(hashedPwd);
       if (!user) {
         return res.status(500).json({ error: 'Internal Server Error' });
       }
@@ -196,30 +193,23 @@ class UserController {
       if (!await dbClient.isAlive()) {
         return res.status(500).json({ error: 'Database connection failed' });
       }
-      // setup JWT using token for this object
-      // const xToken = await authClient.createXToken(student.id);
+      // procedd user to login after password change
       return res.status(201).json({
         message: 'Password reset successfully',
         email: user.email,
-        // xToken,
       });
-      // needed for the student profile activation
     } catch (err) {
       console.error(err);
       return res.status(400).json({ error: err });
     }
   }
 
-  static async setChangePassword(req, res) {
-    // Implement JWt here
-    // const rdfxn = await authClient.checkCurrConn(req, res);
-    // if (rdfxn.error) {
-    //   return res.status(401).json({
-    //     error: rdfxn.error,
-    //   });
-    // }
-    // const { ID, xToken } = rdfxn;
-    const user = await User.findById(ID);
+  static async changePassword(req, res) {
+    const id = await authClient.fullCurrCheck(req);
+    if (id.error) {
+      return res.status(400).json({ error: id.error });
+    }
+    const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ error: 'User Object not found' });
     }
@@ -247,14 +237,23 @@ class UserController {
       if (updatedUser.error) {
         return res.status(400).json({ error: updatedUser.error });
       }
-      return res.status(201).json({
-        message: 'Password changed successfully',
-        email: updatedUser.email,
-        // Token,
-      });
     } catch (err) {
       return res.status(400).json({ error: err });
     }
+    // genrate new credential for the user
+    const newCredentials = await authClient.generateJWT(user);
+    if (newCredentials.error) {
+      return res.status(400).json({ error: newCredentials.error });
+    }
+    if (!newCredentials) {
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+    const { accessToken, refreshToken } = newCredentials;
+    return res.status(201).json({
+      message: 'Password changed successfully',
+      accessToken,
+      refreshToken,
+    });
   }
 
   static async login(req, res) {
@@ -318,10 +317,12 @@ class UserController {
   static async logout(req, res) {
     try {
       const accessToken = await authClient.currPreCheck(req);
+      console.log({ accessToken });
       if (accessToken.error) {
         return res.status(400).json({ error: accessToken.error });
       }
       const payload = await authClient.verifyAccessToken(accessToken);
+      console.log({ payload });
       if (payload.error) {
         return res.status(400).json({ error: payload });
       }
@@ -330,20 +331,20 @@ class UserController {
         return res.status(400).json({ error: 'Invalid token' });
       }
       // delete the access token from Redis
-      try {
-        await authClient.deleteJWT(id);
-      } catch (err) {
-        return res.status(500).json({ error: 'Redis Internal Server Error', err });
+      const result = await authClient.deleteJWT(id);
+      if (result.error) {
+        return res.status(500).json(result);
       }
-      // delete the refresh token
-      try {
-        await RefreshToken.deleteOne({ userId: id });
-      } catch (err) {
-        return res.status(500).json({ error: 'Database Internal Server Error', msg: err.message });
+      const ret = await RefreshToken.deleteOne({ userId: id });
+      if (ret.deletedCount === 0) {
+        return res.status(500).json({ error: 'Token Object does not exit' });
       }
-      return res.status(200).json({ message: 'Logout successful' });
+      if (ret.deletedCount === 1 && result === 1) {
+        return res.status(201).json({ message: 'Logout successful' });
+      }
+      return res.status(500).json({ error: 'Invalid Operational Request', msg: 'Logout failed' });
     } catch (err) {
-      return res.status(500).json({ error: 'Failed to logout' });
+      return res.status(500).json({ error: 'Failed to logout', msg: err.message });
     }
   }
 
