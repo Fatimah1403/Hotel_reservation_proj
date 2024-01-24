@@ -2,7 +2,6 @@ import React from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import { errorToast, successToast } from "../../components/utils/toastify";
-// import { validate } from "../../../../../server/models/RefreshToken";
 
 const Login = () => {
   const navigate = useNavigate();

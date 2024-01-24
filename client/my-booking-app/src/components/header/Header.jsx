@@ -44,6 +44,10 @@ const Header = ({ type }) => {
         navigate("/hotels", { state: { destination, date, options } })
     }
 
+    const handleNavigation = () => {
+        navigate("/register")
+    }
+
   return (
     <div className="header">
       <div className={type === "list" ? "headerContainer listMode" : "headerContainer"}>
@@ -82,7 +86,7 @@ const Header = ({ type }) => {
                 and experience comfort like never before.
                 </p>
 
-                <button className="headerBtn">Sign Up / Sign In</button>
+                <button className="headerBtn" onClick={handleNavigation}>Get Started</button>
                 <div className="headerSearch">
                     <div className="headerSearchItem">
                         <FontAwesomeIcon icon={ faBed}className="headerIcon" />

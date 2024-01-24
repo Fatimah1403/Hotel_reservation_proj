@@ -1,4 +1,4 @@
-// import React from "react";
+import React from "react";
 import "./Register.css";
 import { useNavigate } from "react-router-dom";
 import { errorToast, successToast } from "../../components/utils/toastify";
@@ -39,7 +39,7 @@ const Register = () => {
       console.log(response[0]);
     }
     catch(error){
-      console.log(error)
+
     }
 
   };

@@ -14,8 +14,6 @@ const Navbar = () => {
     navigate("/register")
   }
 
-
-
   return (
     <div className="navbar">
         <div className="navContainer">

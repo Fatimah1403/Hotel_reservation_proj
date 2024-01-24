@@ -38,6 +38,12 @@
   border: none;
   padding: 5px;
 }
+.lsItem>select {
+  height: 30px;
+  border: none;
+  padding: 5px;
+}
+
 .lsItem>span {
   height: 30px;
   padding: 5px;

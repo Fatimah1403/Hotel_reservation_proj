@@ -104,10 +104,10 @@
 .boxs form .columns{
     display: flex;
     justify-content: center;
-    /* flex-direction: column; */
 }
 .boxs form .rows{
     margin-right: 12px;
+    width: 100%;
     /* flex-direction: column; */
 }
 .boxs form h2 {
@@ -125,7 +125,7 @@
 
 .boxs form .inputBoxs input {
     position: relative;
-    /* width: 100%; */
+    width: 100%;
     padding: 20px 10px 10px;
     background: transparent;
     outline: none;

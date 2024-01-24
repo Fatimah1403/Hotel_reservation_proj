@@ -1,26 +1,26 @@
 .featured {
-    width: 100%;
-    max-width: 1024px;
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    /* margin-top: 50px; */
-    z-index: 1;
+  width: 100%;
+  max-width: 1024px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  /* margin-top: 50px; */
+  z-index: 1;
 }
 .featuredItem {
-  position: relative;
-  color: white;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 250px;
+position: relative;
+color: white;
+border-radius: 10px;
+overflow: hidden;
+height: 250px;
 }
 .featuredimg {
-    width: 100%;
-    object-fit: cover;
+  width: 100%;
+  object-fit: cover;
 }
 .featuredTitles {
-   position: absolute; 
-   bottom: 20px;
-   /* color: black; */
-   left: 20px;
+ position: absolute; 
+ bottom: 20px;
+ /* color: black; */
+ left: 20px;
 }

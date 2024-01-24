@@ -1,0 +1,105 @@
+.ui.special.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  .custom-heading{
+    margin-top: 20px;
+    margin-bottom: 0;
+    text-align: center;
+  }
+  .card {
+    width: 300px;
+    /* margin: 10px; */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+    position: relative;
+  }
+  
+  .card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .blurring.dimmable.image {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .blurring.dimmable.image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: filter 0.3s;
+  }
+  
+  .card:hover .blurring.dimmable.image img {
+    filter: brightness(0.7);
+  }
+  
+  .ui.dimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.3s;
+  }
+  
+  .card:hover .ui.dimmer {
+    opacity: 1; /* Display on hover */
+  }
+  
+  .ui.dimmer .content {
+    text-align: center;
+  }
+  
+  .ui.inverted.button {
+    background-color: #9b34eb;;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .ui.inverted.button:hover {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .content {
+    padding: 15px;
+  }
+  .headers {
+    font-size: 1.5rem;
+    color: #333;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .meta {
+    color: #555;
+    margin-top: 5px;
+  }
+  
+  .extra.content {
+    padding: 15px;
+    background-color: #f9f9f9;
+  }
+  
+  .extra.content a {
+    color: #a83292;
+    text-decoration: none;
+  }
+  
+  .extra.content a i {
+    margin-right: 5px;
+  }
+  
