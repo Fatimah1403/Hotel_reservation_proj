@@ -2,7 +2,6 @@ const JWT = require('jsonwebtoken');
 const redisClient = require('../utils/redis');
 const dbClient = require('../utils/db');
 const RefreshToken = require('../models/RefreshToken');
-require('dotenv').config();
 
 const EXP = 60 * 60 * 24; // 24hrs
 // const EXP = 15; // 15s
@@ -93,6 +92,7 @@ class AuthController {
   static async refreshJWT(oldRefreshToken, payload) {
     try {
       // Find the old refresh token
+      // eslint-disable-next-line max-len
       const refreshTokenObj = await RefreshToken.findOne({ userId: payload.id, token: oldRefreshToken });
       // Check if the old refresh token exists
       if (!refreshTokenObj) {
