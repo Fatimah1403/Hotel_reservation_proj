@@ -38,7 +38,7 @@ const RoomList = () => {
                         style={{ textDecoration: "none" }}
                         className="ui inverted button"
                       >
-                        View Details
+                        Book Room
                       </Link>
                     </div>
                   </div>

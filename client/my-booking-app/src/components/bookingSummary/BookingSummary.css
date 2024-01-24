@@ -1,0 +1,68 @@
+.booking-summary{
+    display: flex;
+    gap: 20px;
+}
+.booking-summary .booking-info{
+    border-radius: 10px;
+    width: 80%;
+    border: 1.5px solid rgb(239, 17, 17);
+}
+.booking-card{
+    width: 40%;
+}
+.order-summary {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+.custom-section h2 {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    color: #9b34eb;
+}
+.order-details {
+    padding-top: 10px;
+}
+
+.total {
+    font-weight: bold;
+    color: #000;
+}
+.columns{
+    display: flex;
+    justify-content: space-between;
+}
+.rows h3{
+    color: #eb34db;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+.date {
+    position: absolute; 
+    top: 400px;
+    right: 10px;
+    z-index: 2;
+  }
+.btn, .cancel-btn {
+    background-color: #45a049;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+}
+.cancel-btn{
+    background-color: #f11414;
+}
+
+.btn:hover {
+    background-color: #eb34db;
+}
+.action-buttons{
+    display: flex;
+    justify-content: space-between;
+}
