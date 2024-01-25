@@ -3,6 +3,7 @@
 const express = require('express');
 
 const userController = require('../controllers/UsersController');
+const imageController = require('../controllers/ImageController');
 
 const userRouter = express.Router();
 
@@ -17,11 +18,14 @@ userRouter.get('/logout', userController.logout);
 userRouter.post('/resetpassword', userController.resetPassword);
 userRouter.put('/newpassword', userController.newPassword);
 userRouter.put('/changepassword', userController.changePassword);
-// userRouter.get('/verify', userController.verifyUser);
-
-// userRouter.get('/refresh', userController.refreshToken);
-
-// userRouter.get('/profile', userController.getProfile);
+userRouter.get('/me', userController.userData);
+userRouter.get('/bookings/:id', userController.bookings);
+userRouter.post('/bookroom', userController.bookRoom);
+userRouter.patch('/updatebooking/:id', userController.updateBooking);
+userRouter.delete('/deletebooking/:id', userController.deleteBooking);
+userRouter.get('/signature', imageController.getSignature);
+userRouter.post('/uploadimage', imageController.uploadNewImage);
+userRouter.get('/me', userController.userData);
 
 // userRouter.patch('/profile', userController.updateProfile);
 

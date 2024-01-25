@@ -51,7 +51,6 @@ class UserController {
   //     if (!Object.prototype.hasOwnProperty.call(req.body, key)) {
   //       return res.status(400).json({
   //         error: `Missing required attribute: ${key}`,
-  // eslint-disable-next-line max-len
   //         genFormat: '{ username: <string>, email: <string>, country: <string>, city: <string>, ...}',
   //       });
   //     }
@@ -145,7 +144,6 @@ class UserController {
     // Generate and send password reset token
     const resetToken = await user.generateOTP();
     try {
-      // eslint-disable-next-line no-undef
       await mailClient.sendToken(user);
     } catch (err) {
       return res.status(500).json({
@@ -172,7 +170,6 @@ class UserController {
     if (dataDecode.error) {
       return res.status(400).json({ error: dataDecode.error });
     }
-    // eslint-disable-next-line no-undef
     const { email, password } = decodeData;
     if (!email) {
       return res.status(400).json({ error: 'Missing email' });
@@ -300,7 +297,14 @@ class UserController {
       if (!isMatch) {
         return res.status(401).json({ error: 'Incorrect password' });
       }
-
+      const id = user._id.toString();
+      if (!id) {
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      const userData = await authClient.dashBoardCheck(id);
+      if (!userData) {
+        return res.status(400).json({ error: 'Invalid token to fetch userData' });
+      }
       // set up JWT token using this credentials
       const { accessToken, refreshToken } = await authClient.generateJWT(user);
       if (!accessToken || !refreshToken) {
@@ -315,6 +319,7 @@ class UserController {
       return res.status(201).json({
         message: 'Login successful',
         email: user.email,
+        userData,
         accessToken,
         refreshToken,
       });
@@ -367,7 +372,6 @@ class UserController {
     if (payload.error) {
       return res.status(400).json({ error: payload });
     }
-    console.log(payload);
     const { id } = payload;
     if (!id) {
       return res.status(400).json({ error: 'Invalid token' });
@@ -401,9 +405,29 @@ class UserController {
     if (!updatedUser) {
       return res.status(500).json({ error: 'Internal Server Error' });
     }
+    const userData = await authClient.dashBoardCheck(id);
+    if (!userData) {
+      return res.status(400).json({ error: 'Invalid token to fetch userData' });
+    }
     return res.status(201).json({
       message: 'Profile updated successfully',
-      user: updatedUser,
+      userData,
+    });
+  }
+
+  static async userData(req, res) {
+    const ops = await authClient.fullCurrCheck(req);
+    if (ops.error) {
+      return res.status(400).json({ error: ops.error });
+    }
+    const { id, accessToken } = ops;
+    const userData = await authClient.dashBoardCheck(id);
+    if (userData.error) {
+      return res.status(400).json({ error: userData.error });
+    }
+    return res.status(200).json({
+      userData,
+      accessToken,
     });
   }
 
@@ -448,9 +472,9 @@ class UserController {
     if (payload.id !== id) {
       return res.status(400).json({ error: 'Invalid token' });
     }
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+    const userData = await authClient.dashBoardCheck(id);
+    if (!userData) {
+      return res.status(400).json({ error: 'Invalid token to fetch userData' });
     }
     const bookings = await Booking.find({ userId: payload.id });
     if (!bookings) {
@@ -458,7 +482,7 @@ class UserController {
     }
     return res.status(200).json({
       accessToken,
-      userData: user,
+      userData,
       bookings,
 
     });
@@ -493,9 +517,9 @@ class UserController {
     if (payload.id !== userId) {
       return res.status(400).json({ error: 'Invalid token' });
     }
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+    const userData = await authClient.dashBoardCheck(id);
+    if (!userData) {
+      return res.status(400).json({ error: 'Invalid token to fetch userData' });
     }
     const booking = await Booking.create({ userId: payload.id, roomId, checkIn, checkOut, price });
     if (!booking) {
@@ -504,7 +528,7 @@ class UserController {
     return res.status(201).json({
       message: 'Room booked successfully',
       bookingData: booking,
-      userData: user,
+      userData,
       accessToken,
     });
   }
@@ -545,9 +569,9 @@ class UserController {
     if (booking.checkIn === checkIn && booking.checkOut === checkOut && booking.price === price) {
       return res.status(400).json({ error: 'No changes made' });
     }
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+    const userData = await authClient.dashBoardCheck(payload.id);
+    if (!userData) {
+      return res.status(400).json({ error: 'Invalid token to fetch userData' });
     }
     const updatedBooking = await booking.updateBooking({ checkIn, checkOut, price });
     if (!updatedBooking) {
@@ -556,7 +580,7 @@ class UserController {
     return res.status(201).json({
       message: 'Booking updated successfully',
       bookingData: updatedBooking,
-      userData: user,
+      userData,
       accessToken,
     });
   }
@@ -581,9 +605,9 @@ class UserController {
     if (payload.id !== userId) {
       return res.status(400).json({ error: 'Invalid token' });
     }
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+    const userData = await authClient.dashBoardCheck(payload.id);
+    if (!userData) {
+      return res.status(400).json({ error: 'Invalid token to fetch userData' });
     }
     const booking = await Booking.findOne({ userId: payload.id, roomId });
     if (!booking) {
@@ -601,7 +625,7 @@ class UserController {
     }
     return res.status(201).json({
       message: 'Booking deleted successfully',
-      userData: user,
+      userData,
       accessToken,
     });
   }

@@ -2,6 +2,7 @@ const JWT = require('jsonwebtoken');
 const redisClient = require('../utils/redis');
 const dbClient = require('../utils/db');
 const RefreshToken = require('../models/RefreshToken');
+const User = require('../models/User');
 
 const EXP = 60 * 60 * 24; // 24hrs
 // const EXP = 15; // 15s
@@ -202,7 +203,53 @@ class AuthController {
     if (redisAccessToken !== accessToken) {
       return { error: 'Invalid token' };
     }
-    return id;
+    return { id, accessToken };
+  }
+
+  static async fullAdminCheck(req) {
+    const accessToken = await this.currPreCheck(req);
+    if (accessToken.error) {
+      return { error: accessToken.error };
+    }
+    const payload = await this.verifyAccessToken(accessToken);
+    if (payload.error) {
+      return { error: payload.error };
+    }
+    const { id } = payload;
+    if (!id) {
+      return { error: 'Invalid token for associated ID' };
+    }
+    const redisAccessToken = await this.getJWT(payload.id);
+    if (redisAccessToken.error) {
+      return { error: redisAccessToken.error };
+    }
+    if (redisAccessToken !== accessToken) {
+      return { error: 'Invalid token' };
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      return { error: 'User does not exist' };
+    }
+    if (!user.isAdmin) {
+      return { error: 'User is not an admin' };
+    }
+    return { id, accessToken };
+  }
+
+  static async dashBoardCheck(id) {
+    const user = await User.findById(id);
+    if (!user) {
+      return { error: 'User does not exist' };
+    }
+    const userData = {};
+    const userObj = user.toObject();
+    const exclude = ['_id', 'password', '__v', 'createdAt', 'updatedAt'];
+    Object.keys(userObj).forEach((key) => {
+      if (!exclude.includes(key)) {
+        userData[key] = user[key];
+      }
+    });
+    return userData;
   }
 }
 

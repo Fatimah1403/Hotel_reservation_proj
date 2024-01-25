@@ -1,23 +1,26 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jest/require-hook */
 /* eslint-disable no-unused-vars */
+require('dotenv').config();
 const express = require('express');
 const logger = require('morgan');
+const multer = require('multer');
 const router = require('./routes/router');
 const redisClient = require('./utils/redis');
 const dbClient = require('./utils/db');
-require('dotenv').config();
 
+const upload = multer();
 const app = express();
 const port = process.env.EXPRESS_PORT;
-// establishing DB connection
 
 // middleware
+app.use(upload.single('file')); // Place this before your routes
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use(router);
-app.use(logger('dev'));
+// app.use(logger('dev'));
 
 // Error handling
 app.use((err, _req, res, _next) => {
