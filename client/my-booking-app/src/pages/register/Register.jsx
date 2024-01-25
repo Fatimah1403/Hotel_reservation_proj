@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { errorToast, successToast } from "../../components/utils/toastify";
 import { faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import requestHandler from "../../components/utils/requestHandler";
+import axios from "axios";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -17,31 +18,37 @@ const Register = () => {
       country: event.target.elements.country.value,
       city: event.target.elements.city.value,
       phone: event.target.elements.phone.value,
-    }
-
+    };
 
     // const validator = await validator(data)
-    const validator = true
+    const validator = true;
 
-    if (!validator){
+    if (!validator) {
       // register user
+      errorToast("error registering user");
+    }
+    const baseUrl = "http://localhost:5000/api/v1/users";
+    const uri = `${baseUrl}/signup/`;
+
+    try {
+      const userCredentials = `${data.email}:${data.password}`;
+      console.log(userCredentials);
+      const encodedCredentials = btoa(userCredentials);
+
+      const response = await axios.post(uri, data, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Basic ${encodedCredentials}`
+        }
+      })
+      if (response.status >= 200 && response.status < 300){
+        console.log(response.data);
+        successToast("user registration successful")
+      }
+    } catch (error) {
+      console.error(error);
       errorToast("error registering user")
     }
-    const baseUrl = "http://localhost:6000/api/v1/users"
-    const uri = `${baseUrl}/signup`
-
-    try{
-      const parsedData = {
-        ...data,
-        email: ""
-      }
-      const response = requestHandler("post", uri, data)
-      console.log(response[0]);
-    }
-    catch(error){
-
-    }
-
   };
 
   return (
